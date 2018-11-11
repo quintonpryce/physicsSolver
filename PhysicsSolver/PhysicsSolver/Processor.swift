@@ -12,20 +12,22 @@ import Foundation
 
 class Processor {
     
-    var ignore: [String] = []
+    
     let equations: [String: (String, [String: Double]) -> Formula?]
     
     init(equations: [String: (String, [String: Double]) -> Formula?]){
         self.equations = equations
     }
-    
+    var ignore: [String] = []
     // preforms the processing of arguments (variables) it tries to compute our result with all the equations
     func processArgs(result: String, args: [String: Double]) -> Double {
+        
         for (key, equation) in equations {
             if key.contains(result) && !ignore.contains(key) {
+                print ("processing args for result: \(result), args: \(args), with key: \(key)")
                 ignore.append(key)
                 let result = preform(formula: equation(result, args), for: result, with: args)
-                
+                print(result)
                 if result != 0.0 {
                     return result
                 }

@@ -82,13 +82,10 @@ class Kinematics {
         print("dat")
         switch result {
         case "d":
-            guard let a = args["a"], let t = args["t"] else { return nil }
             return Formula(variables: ["a", "t"], equation: { (args) -> Double in return (args["a"] ?? 0) * pow((args["t"] ?? 0), 2) / 2 })
         case "a":
-            guard let d = args["d"], let t = args["t"] else { return nil }
             return Formula(variables: ["d", "t"], equation: { (args) -> Double in return (args["d"] ?? 0) * 2 / pow((args["t"] ?? 1), 2) })
         case "t":
-            guard let d = args["d"], let a = args["a"] else { return nil }
             return Formula(variables: ["d", "a"], equation: { (args) -> Double in return pow(2 * (args["d"] ?? 0) / (args["a"] ?? 1), 1/2) })
         default:
             return nil
@@ -105,9 +102,9 @@ class Kinematics {
         case "1":
             return Formula(variables: ["2", "a", "d"], equation: { (args) -> Double in return pow(pow((args["2"] ?? 0), 2) - (2 * (args["a"] ?? 0) * (args["d"] ?? 0)), 1/2) })
         case "a":
-            return Formula(variables: ["2", "1", "d"], equation: { (args) -> Double in return (pow((args["2"] ?? 0), 2) - pow((args["1"] ?? 0), 2)) / 2 * (args["d"] ?? 1) })
+            return Formula(variables: ["2", "1", "d"], equation: { (args) -> Double in return (pow((args["2"] ?? 0), 2) - pow((args["1"] ?? 0), 2)) / (2 * (args["d"] ?? 1)) })
         case "d":
-            return Formula(variables: ["2", "1", "a"], equation: { (args) -> Double in return (pow((args["2"] ?? 0), 2) - pow((args["1"] ?? 0), 2)) / 2 * (args["a"] ?? 1) })
+            return Formula(variables: ["2", "1", "a"], equation: { (args) -> Double in return (pow((args["2"] ?? 0), 2) - pow((args["1"] ?? 0), 2)) / (2 * (args["a"] ?? 1)) })
         default:
             return nil
         }
@@ -119,17 +116,25 @@ class Kinematics {
         print("d1tat")
         switch result {
         case "d":
-            let firstHalf = ((args["1"] ?? 0) * (args["t"] ?? 0))
-            let secondHalf = ((args["a"] ?? 0) * pow((args["t"] ?? 0), 2) / 2)
-            return Formula(variables: ["1", "a", "t"], equation: { (args) -> Double in return firstHalf + secondHalf })
+            return Formula(variables: ["1", "a", "t"], equation: { (args) -> Double in
+                let firstHalf = ((args["1"] ?? 0) * (args["t"] ?? 0))
+                let secondHalf = ((args["a"] ?? 0) * pow((args["t"] ?? 0), 2) / 2)
+                return firstHalf + secondHalf })
         case "1":
-            let firstHalf = ((args["d"] ?? 0) - ((args["a"] ?? 0) * pow((args["t"] ?? 0), 2) / 2))
-            return Formula(variables: ["d", "a", "t"], equation: { (args) -> Double in return firstHalf / (args["t"] ?? 1) })
+            return Formula(variables: ["d", "a", "t"], equation: { (args) -> Double in
+                let firstHalf = ((args["d"] ?? 0) - ((args["a"] ?? 0) * pow((args["t"] ?? 0), 2) / 2))
+                return firstHalf / (args["t"] ?? 1) })
         case "a":
-            let firstHalf = ((args["d"] ?? 0) - ((args["1"] ?? 0) * (args["t"] ?? 0)))
-            return Formula(variables: ["2", "1", "d"], equation: { (args) -> Double in return firstHalf / (1/2 * pow((args["t"] ?? 1), 2)) })
+            return Formula(variables: ["2", "1", "d"], equation: { (args) -> Double in
+                let firstHalf = ((args["d"] ?? 0) - ((args["1"] ?? 0) * (args["t"] ?? 0)))
+                return firstHalf / (1/2 * pow((args["t"] ?? 1), 2)) })
         case "t":
-            return Formula(variables: ["d", "1", "a"], equation: { (args) -> Double in return (-(args["1"] ?? 0) + (pow(pow((args["1"] ?? 0), 2) + (2 * (args["a"] ?? 0) * (args["d"] ?? 0)), 1/2))) / (args["a"] ?? 1) })
+            let first = (pow((args["1"] ?? 0), 2) + (2 * (args["a"] ?? 0) * (args["d"] ?? 0))).squareRoot()
+            return Formula(variables: ["d", "1", "a"], equation: { (args) -> Double in
+                let t1 = (-(args["1"] ?? 0) + first) / (args["a"] ?? 1)
+                let t2 = (-(args["1"] ?? 0) - first) / (args["a"] ?? 1)
+                return t1 >= t2 ? t1 : t2
+            })
         default:
             return nil
         }
